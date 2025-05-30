@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Firebase Auth Form</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Poppins", sans-serif; }
+    body {
+      background: linear-gradient(to right, #e2e2e2, #c9d6ff);
+    }
+    .container {
+      background: #fff;
+      width: 450px;
+      padding: 1.5rem;
+      margin: 50px auto;
+      border-radius: 10px;
+      box-shadow: 0 20px 35px rgba(0,0,1,0.1);
+    }
+    .form-title {
+      text-align: center;
+      margin-bottom: 1rem;
+      font-size: 1.8rem;
+      font-weight: bold;
+    }
+    .input-group {
+      position: relative;
+      margin-bottom: 1.5rem;
+    }
+    .input-group i {
+      position: absolute;
+      top: 12px;
+      left: 10px;
+      color: #333;
+    }
+    .input-group input {
+      width: 100%;
+      padding: 10px 10px 10px 35px;
+      border: none;
+      border-bottom: 1px solid #999;
+      font-size: 1rem;
+      background: transparent;
+    }
+    .input-group label {
+      position: absolute;
+      top: -20px;
+      left: 35px;
+      font-size: 0.9rem;
+      color: #555;
+    }
+    .btn {
+      width: 100%;
+      padding: 10px;
+      background: rgb(125,125,235);
+      border: none;
+      color: white;
+      font-size: 1rem;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .btn:hover {
+      background: #07001f;
+    }
+    .toggle-btn {
+      background: none;
+      border: none;
+      color: rgb(125,125,235);
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .toggle-btn:hover {
+      text-decoration: underline;
+    }
+    .or {
+      text-align: center;
+      margin: 1rem 0;
+    }
+    .google-btn {
+      background: white;
+      color: black;
+      border: 1px solid #ccc;
+      padding: 10px;
+      width: 100%;
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      cursor: pointer;
+    }
+    .google-btn img {
+      width: 20px;
+    }
+    .links {
+      text-align: center;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="signInForm">
+    <h1 class="form-title">Sign In</h1>
+    <div class="input-group">
+      <i class="fas fa-envelope"></i>
+      <input type="email" id="email" required placeholder="Email"/>
+      <label for="email">Email</label>
+    </div>
+    <div class="input-group">
+      <i class="fas fa-lock"></i>
+      <input type="password" id="password" required placeholder="Password"/>
+      <label for="password">Password</label>
+    </div>
+    <button class="btn" id="signInBtn">Sign In</button>
+    <p class="or">— or —</p>
+    <div>
+      <button class="google-btn" id="googleSignInBtn">
+        <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google logo"/>
+        Continue with Google
+      </button>
+    </div>
+    <div class="links">
+      <p>Don't have an account? <button class="toggle-btn" onclick="toggleForm()">Sign Up</button></p>
+    </div>
+  </div>
+
+  <div class="container" id="signUpForm" style="display: none;">
+    <h1 class="form-title">Register</h1>
+    <div class="input-group">
+      <i class="fas fa-user"></i>
+      <input type="text" id="fName" required placeholder="First Name"/>
+      <label for="fName">First Name</label>
+    </div>
+    <div class="input-group">
+      <i class="fas fa-user"></i>
+      <input type="text" id="lName" required placeholder="Last Name"/>
+      <label for="lName">Last Name</label>
+    </div>
+    <div class="input-group">
+      <i class="fas fa-envelope"></i>
+      <input type="email" id="rEmail" required placeholder="Email"/>
+      <label for="rEmail">Email</label>
+    </div>
+    <div class="input-group">
+      <i class="fas fa-lock"></i>
+      <input type="password" id="rPassword" required placeholder="Password"/>
+      <label for="rPassword">Password</label>
+    </div>
+    <button class="btn" id="signUpBtn">Sign Up</button>
+    <p class="or">— or —</p>
+    <div>
+      <button class="google-btn" id="googleSignUpBtn">
+        <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google logo"/>
+        Continue with Google
+      </button>
+    </div>
+    <div class="links">
+      <p>Already have an account? <button class="toggle-btn" onclick="toggleForm()">Sign In</button></p>
+    </div>
+  </div>
+
+  <!-- Firebase SDK and Auth logic -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-auth.js";
+
+    // ✅ NEW FIREBASE CONFIG
+    const firebaseConfig = {
+      apiKey: "AIzaSyALPIyCaO5Fmnygb_2LaIfViVpb2JSnkw0",
+      authDomain: "with-html.firebaseapp.com",
+      projectId: "with-html",
+      storageBucket: "with-html.firebasestorage.app",
+      messagingSenderId: "870272342983",
+      appId: "1:870272342983:web:b3545fde34337cbcab17e2"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
+
+    // Toggle Forms
+    window.toggleForm = () => {
+      document.getElementById('signInForm').style.display =
+        document.getElementById('signInForm').style.display === 'none' ? 'block' : 'none';
+      document.getElementById('signUpForm').style.display =
+        document.getElementById('signUpForm').style.display === 'none' ? 'block' : 'none';
+    };
+
+    // Sign Up
+    document.getElementById('signUpBtn').addEventListener('click', async () => {
+      const email = document.getElementById('rEmail').value;
+      const password = document.getElementById('rPassword').value;
+      try {
+        await createUserWithEmailAndPassword(auth, email, password);
+        alert('User registered!');
+      } catch (error) {
+        alert(error.message);
+      }
+    });
+
+    // Sign In
+    document.getElementById('signInBtn').addEventListener('click', async () => {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        alert('Signed in!');
+      } catch (error) {
+        alert(error.message);
+      }
+    });
+
+    // Google Sign In
+    const googleLogin = async () => {
+      try {
+        await signInWithPopup(auth, provider);
+        alert('Signed in with Google!');
+      } catch (error) {
+        alert(error.message);
+      }
+    };
+
+    document.getElementById('googleSignInBtn').addEventListener('click', googleLogin);
+    document.getElementById('googleSignUpBtn').addEventListener('click', googleLogin);
+  </script>
+</body>
+</html>
